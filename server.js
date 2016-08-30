@@ -1,16 +1,36 @@
 'use strict'
 
 const Hapi = require('hapi')
+const vision = require('vision')
+
+const registerViews = server =>
+  server.views({
+    engines: {
+      html: require('handlebars')
+    },
+    relativeTo: __dirname,
+    path: 'templates'
+  })
+
+const registerRoutes = server =>
+  server.route({
+    method: 'GET',
+    path: '/',
+    handler: (req, reply) => reply.view('index', {text: 'hello world'})
+  })
 
 module.exports = callback => {
   const server = new Hapi.Server()
   server.connection({port: 8080})
 
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: (req, reply) => reply('hello world')
-  })
+  server.register(vision, err => {
+    if (err) {
+      return callback(err)
+    }
 
-  callback(null, server)
+    registerViews(server)
+    registerRoutes(server)
+
+    callback(null, server)
+  })
 }
