@@ -12,12 +12,19 @@ const registerViews = server =>
     path: 'templates'
   })
 
-const registerRoutes = server =>
+const registerRoutes = server => {
   server.route({
     method: 'GET',
     path: '/',
-    handler: (req, reply) => reply.view('index', {text: 'hello world'})
+    handler: (req, reply) => reply.view('index')
   })
+
+  server.route({
+    method: 'GET',
+    path: '/company/{id}',
+    handler: (req, reply) => reply.view('company')
+  })
+}
 
 module.exports = callback => {
   const server = new Hapi.Server()
