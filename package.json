@@ -1,0 +1,26 @@
+{
+  "name": "stocks-exercise",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test:lint",
+    "test:lint": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brainsiq/stocks-exercise.git"
+  },
+  "author": "Chris Impey (chris@impey.io)",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/brainsiq/stocks-exercise/issues"
+  },
+  "homepage": "https://github.com/brainsiq/stocks-exercise#readme",
+  "dependencies": {
+    "hapi": "^15.0.2"
+  },
+  "devDependencies": {
+    "standard": "^8.0.0"
+  }
+}
