@@ -19,7 +19,15 @@ describe('Homepage', () => {
       .then(() => driver.findElements(webdriver.By.css('.container a')))
       .then(links => {
         expect(links).to.have.length(5)
-        done()
+
+        return Promise.all([
+          links[0].getText().then(text => expect(text).to.equal('Microsoft Inc')),
+          links[1].getText().then(text => expect(text).to.equal('Google Inc')),
+          links[2].getText().then(text => expect(text).to.equal('Apple Inc')),
+          links[3].getText().then(text => expect(text).to.equal('Facebook Inc')),
+          links[4].getText().then(text => expect(text).to.equal('Pearson Plc'))
+        ])
       })
+      .then(() => done(), done)
   })
 })
