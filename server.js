@@ -1,7 +1,10 @@
 'use strict'
 
+const mongoDbUrl = 'mongodb://mm_recruitment_user_readonly:rebelMutualWhistle@ds037551.mongolab.com:37551/mm-recruitment'
 const Hapi = require('hapi')
 const vision = require('vision')
+const MongoClient = require('mongodb').MongoClient
+const CompaniesDatabase = require('./lib/companies-db')
 
 const registerViews = server =>
   server.views({
@@ -12,20 +15,18 @@ const registerViews = server =>
     path: 'templates'
   })
 
-const registerRoutes = server => {
+const registerRoutes = (server, companiesDatabase) => {
   server.route({
     method: 'GET',
     path: '/',
     handler: (req, reply) => {
-      const companies = [
-        {name: 'Microsoft Inc'},
-        {name: 'Google Inc'},
-        {name: 'Apple Inc'},
-        {name: 'Facebook Inc'},
-        {name: 'Pearson Plc'}
-      ]
+      companiesDatabase.get((err, companies) => {
+        if (err) {
+          throw err
+        }
 
-      reply.view('index', {companies})
+        reply.view('index', {companies})
+      })
     }
   })
 
@@ -45,9 +46,17 @@ module.exports = callback => {
       return callback(err)
     }
 
-    registerViews(server)
-    registerRoutes(server)
+    MongoClient.connect(mongoDbUrl, (err, database) => {
+      if (err) {
+        return callback(new Error('Database connection error'))
+      }
 
-    callback(null, server)
+      const companiesDatabase = new CompaniesDatabase(database)
+
+      registerViews(server)
+      registerRoutes(server, companiesDatabase)
+
+      callback(null, server)
+    })
   })
 }

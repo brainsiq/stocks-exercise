@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test:lint",
+    "test": "npm run test:unit && npm run test:lint",
     "test:lint": "standard",
-    "test:e2e": "mocha tests/e2e/**/*.js"
+    "test:unit": "mocha tests/unit/**/*.js",
+    "test:e2e": "mocha tests/e2e/**/*.js",
+    "watch": "chokidar '**/*.js' -c 'npm run test'"
   },
   "standard": {
     "globals": [
       "describe",
+      "before",
       "beforeEach",
       "afterEach",
       "it"
@@ -29,12 +32,15 @@
   "dependencies": {
     "handlebars": "^4.0.5",
     "hapi": "^15.0.2",
+    "mongodb": "^2.2.9",
     "vision": "^4.1.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "chokidar-cli": "^1.2.0",
     "mocha": "^3.0.2",
     "phantomjs": "^2.1.7",
+    "proxyquire": "^1.7.10",
     "selenium-webdriver": "^3.0.0-beta-2",
     "standard": "^8.0.0"
   }
