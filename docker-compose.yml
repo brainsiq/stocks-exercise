@@ -1,0 +1,12 @@
+app:
+  image: node:6.5
+  volumes:
+    - .:/app
+  working_dir: /app
+  command: sh -c 'npm i && node index.js'
+
+e2e_test:
+  extends: app
+  links:
+    - app
+  command: sh -c 'npm i && npm run test:e2e'

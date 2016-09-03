@@ -5,7 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run test:lint",
-    "test:lint": "standard"
+    "test:lint": "standard",
+    "test:e2e": "mocha tests/e2e/**/*.js"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "beforeEach",
+      "afterEach",
+      "it"
+    ]
   },
   "repository": {
     "type": "git",
@@ -23,6 +32,10 @@
     "vision": "^4.1.0"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "phantomjs": "^2.1.7",
+    "selenium-webdriver": "^3.0.0-beta-2",
     "standard": "^8.0.0"
   }
 }
