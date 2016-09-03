@@ -3,6 +3,13 @@
 const webdriver = require('selenium-webdriver')
 const expect = require('chai').expect
 
+const siteUrl = 'http://app:8080'
+const getRandomIntInRange = (min, max) =>
+  Math.floor(Math.random() * (max - min + 1)) + min
+
+const selectRandomLink = links =>
+  links[getRandomIntInRange(0, links.length - 1)]
+
 describe('Homepage', () => {
   let driver
 
@@ -15,7 +22,7 @@ describe('Homepage', () => {
   afterEach(() => driver.quit())
 
   it('displays a list of companies', done => {
-    driver.get('http://app:8080')
+    driver.get(siteUrl)
       .then(() => driver.findElements(webdriver.By.css('.container a')))
       .then(links => {
         expect(links).to.have.length(5)
@@ -27,6 +34,21 @@ describe('Homepage', () => {
           links[3].getText().then(text => expect(text).to.equal('Facebook Inc')),
           links[4].getText().then(text => expect(text).to.equal('Pearson Plc'))
         ])
+      })
+      .then(() => done(), done)
+  })
+
+  it('navigates to a company details page', done => {
+    driver.get(siteUrl)
+      .then(() => driver.findElements(webdriver.By.css('.container a')))
+      .then(links => selectRandomLink(links))
+      .then(link => Promise.all([link.getText(), link.click()]))
+      .then(previous => {
+        const companyName = previous[0]
+
+        return driver.findElement(webdriver.By.css('.panel-heading'))
+          .then(companyDetailsHeading => companyDetailsHeading.getText())
+          .then(text => expect(text).to.equal(companyName))
       })
       .then(() => done(), done)
   })
