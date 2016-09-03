@@ -13,21 +13,11 @@
     </nav>
     <div class="container">
       <ul class="list-group">
+        {{#each companies}}
         <li class="list-group-item">
-          <a href="/company/1">Company 1</a>
+          <a href="/company/1">{{name}}</a>
         </li>
-        <li class="list-group-item">
-          <a href="/company/2">Company 2</a>
-        </li>
-        <li class="list-group-item">
-          <a href="/company/3">Company 3</a>
-        </li>
-        <li class="list-group-item">
-          <a href="/company/4">Company 4</a>
-        </li>
-        <li class="list-group-item">
-          <a href="/company/5">Company 5</a>
-        </li>
+        {{/each}}
       <ul>
     </div>
   </body>

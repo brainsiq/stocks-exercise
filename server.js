@@ -16,7 +16,17 @@ const registerRoutes = server => {
   server.route({
     method: 'GET',
     path: '/',
-    handler: (req, reply) => reply.view('index')
+    handler: (req, reply) => {
+      const companies = [
+        {name: 'Microsoft Inc'},
+        {name: 'Google Inc'},
+        {name: 'Apple Inc'},
+        {name: 'Facebook Inc'},
+        {name: 'Pearson Plc'}
+      ]
+
+      reply.view('index', {companies})
+    }
   })
 
   server.route({
