@@ -33,7 +33,18 @@ const registerRoutes = (server, companiesDatabase) => {
   server.route({
     method: 'GET',
     path: '/company/{id}',
-    handler: (req, reply) => reply.view('company')
+    handler: (req, reply) => {
+      companiesDatabase.get((err, companies) => {
+        if (err) {
+          throw err
+        }
+
+        const selectedCompany = companies.find(
+          c => c.id.toString() === req.params.id)
+
+        reply.view('company', selectedCompany)
+      })
+    }
   })
 }
 
