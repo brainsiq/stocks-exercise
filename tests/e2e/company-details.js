@@ -3,7 +3,9 @@
 const expect = require('chai').expect
 const common = require('./common')
 
-describe('Company details', () => {
+describe('Company details', function () {
+  this.timeout(5000)
+
   let driver
 
   beforeEach(() => {
