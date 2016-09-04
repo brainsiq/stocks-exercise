@@ -33,6 +33,7 @@
   "dependencies": {
     "handlebars": "^4.0.5",
     "hapi": "^15.0.2",
+    "inert": "^4.0.2",
     "mongodb": "^2.2.9",
     "vision": "^4.1.0"
   },

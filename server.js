@@ -3,6 +3,7 @@
 const mongoDbUrl = 'mongodb://mm_recruitment_user_readonly:rebelMutualWhistle@ds037551.mongolab.com:37551/mm-recruitment'
 const Hapi = require('hapi')
 const vision = require('vision')
+const inert = require('inert')
 const MongoClient = require('mongodb').MongoClient
 const Companies = require('./lib/companies')
 const sentimentDictionaries = require('./lib/sentiment-dictionaries')
@@ -19,6 +20,19 @@ const registerViews = server =>
   })
 
 const registerRoutes = (server, companies) => {
+  // serve static assets
+  // note this should ideally be done through a server like nginx rather
+  // than serving through node
+  server.route({
+    method: 'GET',
+    path: '/static/{param*}',
+    handler: {
+      directory: {
+        path: 'static'
+      }
+    }
+  })
+
   server.route({
     method: 'GET',
     path: '/',
@@ -52,7 +66,7 @@ module.exports = callback => {
   const server = new Hapi.Server()
   server.connection({port: 8080})
 
-  server.register(vision, err => {
+  server.register([vision, inert], err => {
     if (err) {
       return callback(err)
     }
