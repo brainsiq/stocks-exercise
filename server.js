@@ -20,7 +20,7 @@ const registerRoutes = (server, companiesDatabase) => {
     method: 'GET',
     path: '/',
     handler: (req, reply) => {
-      companiesDatabase.get((err, companies) => {
+      companiesDatabase.getAll((err, companies) => {
         if (err) {
           throw err
         }
@@ -34,15 +34,12 @@ const registerRoutes = (server, companiesDatabase) => {
     method: 'GET',
     path: '/company/{id}',
     handler: (req, reply) => {
-      companiesDatabase.get((err, companies) => {
+      companiesDatabase.getOne(req.params.id, (err, company) => {
         if (err) {
           throw err
         }
 
-        const selectedCompany = companies.find(
-          c => c.id.toString() === req.params.id)
-
-        reply.view('company', selectedCompany)
+        reply.view('company', company)
       })
     }
   })

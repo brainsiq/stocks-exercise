@@ -1,11 +1,12 @@
 'use strict'
 
+const ObjectId = require('mongodb').ObjectId
 const expect = require('chai').expect
 
 const testCompaniesData = [
-  {_id: '1', name: 'one', tickerCode: 'A'},
-  {_id: '2', name: 'two', tickerCode: 'B'},
-  {_id: '3', name: 'three', tickerCode: 'C'}
+  {_id: new ObjectId(), name: 'one', tickerCode: 'A'},
+  {_id: new ObjectId(), name: 'two', tickerCode: 'B'},
+  {_id: new ObjectId(), name: 'three', tickerCode: 'C'}
 ]
 
 const stubMongoDatabase = withError => ({
@@ -16,8 +17,9 @@ const stubMongoDatabase = withError => ({
 
     return {
       find (query) {
-        if (Object.keys(query).length) {
-          throw new Error('MongoDb find should be called with an empty query to get all records.')
+        const isFindById = query instanceof ObjectId
+        if (!isFindById && Object.keys(query).length) {
+          throw new Error('Expected db.find() to be called without an empty query to get all, or an ObjectId to get one.')
         }
 
         return {
@@ -26,7 +28,11 @@ const stubMongoDatabase = withError => ({
               return callback(withError)
             }
 
-            callback(null, testCompaniesData)
+            const results = isFindById
+              ? testCompaniesData.filter(c => c._id.equals(query))
+              : testCompaniesData
+
+            callback(null, results)
           }
         }
       }
@@ -37,19 +43,16 @@ const stubMongoDatabase = withError => ({
 const CompaniesDatabase = require('../../lib/companies-db')
 
 describe('Companies database', () => {
-  describe('get', () => {
+  describe('getAll', () => {
     it('retrieves all companies from the database', done => {
       const companiesDatabase = new CompaniesDatabase(stubMongoDatabase())
 
-      companiesDatabase.get((err, companies) => {
-        if (err) {
-          return done(err)
-        }
-
+      companiesDatabase.getAll((err, companies) => {
+        expect(err).to.be.null
         expect(companies).to.deep.equal([
-          {id: '1', name: 'one'},
-          {id: '2', name: 'two'},
-          {id: '3', name: 'three'}
+          {id: testCompaniesData[0]._id.valueOf(), name: 'one'},
+          {id: testCompaniesData[1]._id.valueOf(), name: 'two'},
+          {id: testCompaniesData[2]._id.valueOf(), name: 'three'}
         ])
         done()
       })
@@ -60,11 +63,46 @@ describe('Companies database', () => {
     const companiesDatabase = new CompaniesDatabase(
       stubMongoDatabase(new Error('a test error')))
 
-    companiesDatabase.get((err, companies) => {
+    companiesDatabase.getAll((err, companies) => {
       expect(err).to.be.an.instanceof(Error)
       expect(err.message).to.equal('Database error')
       expect(companies).to.be.undefined
       done()
+    })
+  })
+
+  describe('getOne', () => {
+    it('retrieves a single company', done => {
+      const companiesDatabase = new CompaniesDatabase(stubMongoDatabase())
+      const testCompanyId = testCompaniesData[1]._id.valueOf()
+
+      companiesDatabase.getOne(testCompanyId, (err, company) => {
+        expect(err).to.be.null
+        expect(company).to.deep.equal({id: testCompanyId, name: 'two'})
+        done()
+      })
+    })
+
+    it('returns nothing for a company that does not exist', done => {
+      const companiesDatabase = new CompaniesDatabase(stubMongoDatabase())
+
+      companiesDatabase.getOne(new ObjectId().valueOf(), (err, company) => {
+        expect(err).to.be.null
+        expect(company).to.be.null
+        done()
+      })
+    })
+
+    it('handles mongoDb errors', done => {
+      const companiesDatabase = new CompaniesDatabase(
+        stubMongoDatabase(new Error('a test error')))
+
+      companiesDatabase.getOne(new ObjectId().valueOf(), (err, companies) => {
+        expect(err).to.be.an.instanceof(Error)
+        expect(err.message).to.equal('Database error')
+        expect(companies).to.be.undefined
+        done()
+      })
     })
   })
 })
