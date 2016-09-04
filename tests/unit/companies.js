@@ -66,19 +66,30 @@ describe('Companies', () => {
         .get(`/company/${apiBadResponseCompanyStockCode}`)
         .reply(500, 'api error'))
 
-    it('retrieves a single company', done => {
-      const companies = new Companies(stubMongoDatabase())
+    describe('when successful', () => {
+      let returnedCompany
 
-      companies.details(testCompanyId, (err, company) => {
-        expect(err).to.be.null
-        expect(company).to.deep.equal({
-          id: testCompanyId,
-          name: 'two',
-          tickerCode: 'B',
-          stockPrice: fakeStockPrice
+      before(done => {
+        const companies = new Companies(stubMongoDatabase())
+
+        companies.details(testCompanyId, (err, company) => {
+          if (err) {
+            return done(err)
+          }
+
+          returnedCompany = company
+          done()
         })
+      })
 
-        done()
+      it('returns the company details', () => {
+        expect(returnedCompany).to.have.property('id', testCompanyId)
+        expect(returnedCompany).to.have.property('name', 'two')
+        expect(returnedCompany).to.have.property('tickerCode', 'B')
+      })
+
+      it('returns the stock price', () => {
+        expect(returnedCompany).to.have.property('stockPrice', fakeStockPrice)
       })
     })
 
