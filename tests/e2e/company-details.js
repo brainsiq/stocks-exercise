@@ -26,6 +26,8 @@ describe('Company details', function () {
       .then(() => driver.findElement({id: 'stock-price'}))
       .then(element => element.getText())
       .then(stockPrice => expect(stockPrice).to.match(/\d+p/))
+      .then(() => driver.findElements({css: '.news li'}))
+      .then(newsElements => expect(newsElements).to.have.length.above(1))
       .then(() => done(), done)
   })
 })
