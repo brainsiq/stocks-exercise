@@ -2,6 +2,7 @@
 
 const ObjectId = require('mongodb').ObjectId
 const expect = require('chai').expect
+const nock = require('nock')
 const Companies = require('../../lib/companies')
 
 const testCompaniesData = [
@@ -42,9 +43,31 @@ describe('Companies', () => {
   })
 
   describe('details', () => {
+    const testCompanyId = testCompaniesData[1]._id.valueOf()
+    const testCompanyStockCode = testCompaniesData[1].tickerCode
+    const apiErrorCompanyId = testCompaniesData[0]._id.valueOf()
+    const apiErrorCompanyStockCode = testCompaniesData[1].tickerCode
+    const apiBadResponseCompanyId = testCompaniesData[2]._id.valueOf()
+    const apiBadResponseCompanyStockCode = testCompaniesData[2].tickerCode
+    const fakeStockPrice = Math.random()
+
+    // prevent outgoing http calls to ensure stubs are being used
+    nock.disableNetConnect()
+
+    beforeEach(() =>
+      nock('http://mm-recruitment-stock-price-api.herokuapp.com')
+        .get(`/company/${testCompanyStockCode}`)
+        .reply(200, {
+          tickerCode: testCompanyStockCode,
+          latestPrice: fakeStockPrice
+        })
+        .get(`/company/${apiErrorCompanyStockCode}`)
+        .replyWithError(new Error('an api error'))
+        .get(`/company/${apiBadResponseCompanyStockCode}`)
+        .reply(500, 'api error'))
+
     it('retrieves a single company', done => {
       const companies = new Companies(stubMongoDatabase())
-      const testCompanyId = testCompaniesData[1]._id.valueOf()
 
       companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.null
@@ -52,7 +75,7 @@ describe('Companies', () => {
           id: testCompanyId,
           name: 'two',
           tickerCode: 'B',
-          stockPrice: 1234
+          stockPrice: fakeStockPrice
         })
 
         done()
@@ -77,6 +100,28 @@ describe('Companies', () => {
         expect(err).to.be.an.instanceof(Error)
         expect(err.message).to.equal('Database error')
         expect(companies).to.be.undefined
+        done()
+      })
+    })
+
+    it('handles stock price api http errors', done => {
+      const companies = new Companies(stubMongoDatabase())
+
+      companies.details(apiErrorCompanyId, (err, company) => {
+        expect(err).to.be.an.instanceof(Error)
+        expect(err.message).to.equal('API error')
+        expect(company).to.be.undefined
+        done()
+      })
+    })
+
+    it('handles stock price bad http responses', done => {
+      const companies = new Companies(stubMongoDatabase())
+
+      companies.details(apiBadResponseCompanyId, (err, company) => {
+        expect(err).to.be.an.instanceof(Error)
+        expect(err.message).to.equal('API error')
+        expect(company).to.be.undefined
         done()
       })
     })
