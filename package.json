@@ -8,7 +8,8 @@
     "test:lint": "standard",
     "test:unit": "mocha tests/unit/**/*.js",
     "test:e2e": "mocha tests/e2e/**/*.js",
-    "watch": "chokidar '**/*.js' -c 'npm run test'"
+    "watch": "chokidar '**/*.js' -c 'npm run test'",
+    "start": "node index.js"
   },
   "standard": {
     "globals": [
