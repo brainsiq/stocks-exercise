@@ -45,31 +45,30 @@ describe('Companies', () => {
   describe('details', () => {
     const testCompanyId = testCompaniesData[1]._id.valueOf()
     const testCompanyStockCode = testCompaniesData[1].tickerCode
-    const apiErrorCompanyId = testCompaniesData[0]._id.valueOf()
-    const apiErrorCompanyStockCode = testCompaniesData[1].tickerCode
-    const apiBadResponseCompanyId = testCompaniesData[2]._id.valueOf()
-    const apiBadResponseCompanyStockCode = testCompaniesData[2].tickerCode
     const fakeStockPrice = Math.random()
 
     // prevent outgoing http calls to ensure stubs are being used
     nock.disableNetConnect()
 
-    beforeEach(() =>
-      nock('http://mm-recruitment-stock-price-api.herokuapp.com')
-        .get(`/company/${testCompanyStockCode}`)
-        .reply(200, {
-          tickerCode: testCompanyStockCode,
-          latestPrice: fakeStockPrice
-        })
-        .get(`/company/${apiErrorCompanyStockCode}`)
-        .replyWithError(new Error('an api error'))
-        .get(`/company/${apiBadResponseCompanyStockCode}`)
-        .reply(500, 'api error'))
-
     describe('when successful', () => {
       let returnedCompany
 
       before(done => {
+        nock('http://mm-recruitment-stock-price-api.herokuapp.com')
+          .get(`/company/${testCompanyStockCode}`)
+          .reply(200, {
+            tickerCode: testCompanyStockCode,
+            latestPrice: fakeStockPrice,
+            storyFeedUrl: 'http://example.com/xyz'
+          })
+
+        nock('http://example.com')
+          .get('/xyz')
+          .reply(200, [
+            {id: 1, headline: 'foo', body: 'bar'},
+            {id: 2, headline: 'bar', body: 'foo'}
+          ])
+
         const companies = new Companies(stubMongoDatabase())
 
         companies.details(testCompanyId, (err, company) => {
@@ -82,6 +81,8 @@ describe('Companies', () => {
         })
       })
 
+      after(() => nock.cleanAll())
+
       it('returns the company details', () => {
         expect(returnedCompany).to.have.property('id', testCompanyId)
         expect(returnedCompany).to.have.property('name', 'two')
@@ -90,6 +91,20 @@ describe('Companies', () => {
 
       it('returns the stock price', () => {
         expect(returnedCompany).to.have.property('stockPrice', fakeStockPrice)
+      })
+
+      it('returns the two most recent news stories', () => {
+        expect(returnedCompany).to.have.property('news')
+        expect(returnedCompany.news).to.be.an('array')
+        expect(returnedCompany.news).to.have.length(2)
+        expect(returnedCompany.news[0]).to.deep.equal({
+          headline: 'foo',
+          body: 'bar'
+        })
+        expect(returnedCompany.news[1]).to.deep.equal({
+          headline: 'bar',
+          body: 'foo'
+        })
       })
     })
 
@@ -116,22 +131,76 @@ describe('Companies', () => {
     })
 
     it('handles stock price api http errors', done => {
+      nock('http://mm-recruitment-stock-price-api.herokuapp.com')
+        .get(`/company/${testCompanyStockCode}`)
+        .replyWithError(new Error('an error'))
+
       const companies = new Companies(stubMongoDatabase())
 
-      companies.details(apiErrorCompanyId, (err, company) => {
+      companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.an.instanceof(Error)
-        expect(err.message).to.equal('API error')
+        expect(err.message).to.equal('Stocks API error')
         expect(company).to.be.undefined
         done()
       })
     })
 
     it('handles stock price bad http responses', done => {
+      nock('http://mm-recruitment-stock-price-api.herokuapp.com')
+        .get(`/company/${testCompanyStockCode}`)
+        .reply(500, 'internal server error')
+
       const companies = new Companies(stubMongoDatabase())
 
-      companies.details(apiBadResponseCompanyId, (err, company) => {
+      companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.an.instanceof(Error)
-        expect(err.message).to.equal('API error')
+        expect(err.message).to.equal('Stocks API error')
+        expect(company).to.be.undefined
+        done()
+      })
+    })
+
+    it('handles news feed api errors', done => {
+      nock('http://mm-recruitment-stock-price-api.herokuapp.com')
+        .get(`/company/${testCompanyStockCode}`)
+        .reply(200, {
+          tickerCode: 'abc',
+          latestPrice: 1,
+          storyFeedUrl: 'http://example.com/xyz'
+        })
+
+      nock('http://example.com')
+        .get('/xyz')
+        .replyWithError(new Error('an error'))
+
+      const companies = new Companies(stubMongoDatabase())
+
+      companies.details(testCompanyId, (err, company) => {
+        expect(err).to.be.an.instanceof(Error)
+        expect(err.message).to.equal('News API error')
+        expect(company).to.be.undefined
+        done()
+      })
+    })
+
+    it('handles news feed bad api responses', done => {
+      nock('http://mm-recruitment-stock-price-api.herokuapp.com')
+        .get(`/company/${testCompanyStockCode}`)
+        .reply(200, {
+          tickerCode: 'abc',
+          latestPrice: 1,
+          storyFeedUrl: 'http://example.com/xyz'
+        })
+
+      nock('http://example.com')
+        .get('/xyz')
+        .reply(500, 'internal server error')
+
+      const companies = new Companies(stubMongoDatabase())
+
+      companies.details(testCompanyId, (err, company) => {
+        expect(err).to.be.an.instanceof(Error)
+        expect(err.message).to.equal('News API error')
         expect(company).to.be.undefined
         done()
       })
