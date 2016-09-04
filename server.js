@@ -5,6 +5,9 @@ const Hapi = require('hapi')
 const vision = require('vision')
 const MongoClient = require('mongodb').MongoClient
 const Companies = require('./lib/companies')
+const sentimentDictionaries = require('./lib/sentiment-dictionaries')
+const sentimentAnalyser = require('./lib/sentiment-analyser')
+  .bind(null, sentimentDictionaries.positiveWords, sentimentDictionaries.negativeWords)
 
 const registerViews = server =>
   server.views({
@@ -59,7 +62,7 @@ module.exports = callback => {
         return callback(new Error('Database connection error'))
       }
 
-      const companies = new Companies(database)
+      const companies = new Companies(database, sentimentAnalyser)
 
       registerViews(server)
       registerRoutes(server, companies)

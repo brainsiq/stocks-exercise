@@ -11,12 +11,16 @@ const testCompaniesData = [
   {_id: new ObjectId(), name: 'three', tickerCode: 'C'}
 ]
 
+const fakeSentimentAnalyser = text => text === 'bar'
+  ? 'positive'
+  : 'negative'
+
 const stubMongoDatabase = require('./stub-mongo-db').bind(null, testCompaniesData)
 
 describe('Companies', () => {
   describe('list', () => {
     it('retrieves all companies from the database', done => {
-      const companies = new Companies(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase(), fakeSentimentAnalyser)
 
       companies.list((err, companies) => {
         expect(err).to.be.null
@@ -32,7 +36,7 @@ describe('Companies', () => {
 
   it('handles mongoDb errors', done => {
     const companies = new Companies(
-      stubMongoDatabase(new Error('a test error')))
+      stubMongoDatabase(new Error('a test error')), fakeSentimentAnalyser)
 
     companies.list((err, companies) => {
       expect(err).to.be.an.instanceof(Error)
@@ -69,7 +73,7 @@ describe('Companies', () => {
             {id: 2, headline: 'bar', body: 'foo'}
           ])
 
-        const companies = new Companies(stubMongoDatabase())
+        const companies = new Companies(stubMongoDatabase(), fakeSentimentAnalyser)
 
         companies.details(testCompanyId, (err, company) => {
           if (err) {
@@ -93,23 +97,25 @@ describe('Companies', () => {
         expect(returnedCompany).to.have.property('stockPrice', fakeStockPrice)
       })
 
-      it('returns the two most recent news stories', () => {
+      it('returns the two most recent news stories with sentiment analysis', () => {
         expect(returnedCompany).to.have.property('news')
         expect(returnedCompany.news).to.be.an('array')
         expect(returnedCompany.news).to.have.length(2)
         expect(returnedCompany.news[0]).to.deep.equal({
           headline: 'foo',
-          body: 'bar'
+          body: 'bar',
+          sentiment: 'positive'
         })
         expect(returnedCompany.news[1]).to.deep.equal({
           headline: 'bar',
-          body: 'foo'
+          body: 'foo',
+          sentiment: 'negative'
         })
       })
     })
 
     it('returns nothing for a company that does not exist', done => {
-      const companies = new Companies(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase(), fakeSentimentAnalyser)
 
       companies.details(new ObjectId().valueOf(), (err, company) => {
         expect(err).to.be.null
@@ -120,7 +126,7 @@ describe('Companies', () => {
 
     it('handles mongoDb errors', done => {
       const companies = new Companies(
-        stubMongoDatabase(new Error('a test error')))
+        stubMongoDatabase(new Error('a test error')), fakeSentimentAnalyser)
 
       companies.details(new ObjectId().valueOf(), (err, companies) => {
         expect(err).to.be.an.instanceof(Error)
@@ -135,7 +141,7 @@ describe('Companies', () => {
         .get(`/company/${testCompanyStockCode}`)
         .replyWithError(new Error('an error'))
 
-      const companies = new Companies(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase(), fakeSentimentAnalyser)
 
       companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.an.instanceof(Error)
@@ -150,7 +156,7 @@ describe('Companies', () => {
         .get(`/company/${testCompanyStockCode}`)
         .reply(500, 'internal server error')
 
-      const companies = new Companies(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase(), fakeSentimentAnalyser)
 
       companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.an.instanceof(Error)
@@ -173,7 +179,7 @@ describe('Companies', () => {
         .get('/xyz')
         .replyWithError(new Error('an error'))
 
-      const companies = new Companies(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase(), fakeSentimentAnalyser)
 
       companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.an.instanceof(Error)
@@ -196,7 +202,7 @@ describe('Companies', () => {
         .get('/xyz')
         .reply(500, 'internal server error')
 
-      const companies = new Companies(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase(), fakeSentimentAnalyser)
 
       companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.an.instanceof(Error)
