@@ -16,7 +16,8 @@ const registerViews = server =>
       html: require('handlebars')
     },
     relativeTo: __dirname,
-    path: 'templates'
+    path: './templates',
+    helpersPath: './templates/helpers'
   })
 
 const registerRoutes = (server, companies) => {
