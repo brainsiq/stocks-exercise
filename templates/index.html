@@ -1,7 +1,15 @@
-<ul class="list-group">
-  {{#each companies}}
-  <li class="list-group-item">
-    <a href="/company/{{id}}">{{name}}</a>
-  </li>
-  {{/each}}
-<ul>
+<div class="panel panel-default text-center">
+  <div class="panel-heading card-header">
+    <h4>Tracked companies</h4>
+  </div>
+  <div class="panel-body">
+    <p>Select a company to view the current stock price and relevant news</p>
+  </div>
+  <ul class="list-group">
+    {{#each companies}}
+    <li class="list-group-item">
+      <a href="/company/{{id}}">{{name}}</a>
+    </li>
+    {{/each}}
+  <ul>
+</div>
