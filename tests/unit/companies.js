@@ -2,6 +2,7 @@
 
 const ObjectId = require('mongodb').ObjectId
 const expect = require('chai').expect
+const Companies = require('../../lib/companies')
 
 const testCompaniesData = [
   {_id: new ObjectId(), name: 'one', tickerCode: 'A'},
@@ -9,38 +10,7 @@ const testCompaniesData = [
   {_id: new ObjectId(), name: 'three', tickerCode: 'C'}
 ]
 
-const stubMongoDatabase = withError => ({
-  collection (name) {
-    if (name !== 'company') {
-      throw new Error('Expected MongoDb "company" collection to be accessed')
-    }
-
-    return {
-      find (query) {
-        const isFindById = query instanceof ObjectId
-        if (!isFindById && Object.keys(query).length) {
-          throw new Error('Expected db.find() to be called without an empty query to get all, or an ObjectId to get one.')
-        }
-
-        return {
-          toArray (callback) {
-            if (withError) {
-              return callback(withError)
-            }
-
-            const results = isFindById
-              ? testCompaniesData.filter(c => c._id.equals(query))
-              : testCompaniesData
-
-            callback(null, results)
-          }
-        }
-      }
-    }
-  }
-})
-
-const Companies = require('../../lib/companies')
+const stubMongoDatabase = require('./stub-mongo-db').bind(null, testCompaniesData)
 
 describe('Companies', () => {
   describe('list', () => {
