@@ -1,24 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Stocks Exercise</title>
-    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
-  </head>
-  <body>
-    <nav class="navbar navbar-default">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="#">Stocks Exercise</a>
-      </div>
-    </nav>
-    <div class="container">
-      <ul class="list-group">
-        {{#each companies}}
-        <li class="list-group-item">
-          <a href="/company/{{id}}">{{name}}</a>
-        </li>
-        {{/each}}
-      <ul>
-    </div>
-  </body>
-</html>
+<ul class="list-group">
+  {{#each companies}}
+  <li class="list-group-item">
+    <a href="/company/{{id}}">{{name}}</a>
+  </li>
+  {{/each}}
+<ul>

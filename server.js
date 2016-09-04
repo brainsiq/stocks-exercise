@@ -17,7 +17,9 @@ const registerViews = server =>
     },
     relativeTo: __dirname,
     path: './templates',
-    helpersPath: './templates/helpers'
+    helpersPath: './templates/helpers',
+    layoutPath: './templates/layouts',
+    layout: 'default'
   })
 
 const registerRoutes = (server, companies) => {
