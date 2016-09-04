@@ -4,6 +4,11 @@
     <title>Stocks Exercise</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <style>
+      .card-header {
+        font-weight: bold
+      }
+    </style>
   </head>
   <body>
     <nav class="navbar navbar-default">
@@ -16,15 +21,20 @@
         <div class="panel-heading card-header">
           <span id="company-name">{{name}}</span>
           (<span id="company-code">{{tickerCode}}</span>)
+          <span class="stock-price pull-right">
+            Price: <span id="stock-price">{{stockPrice}}p</span>
+          </span>
         </div>
-        <div class="panel-body">
-          <p>Current Price: <span id="stock-price">{{stockPrice}}p</span></p>
-          <ul class="news">
-            {{#each news}}
-            <li>{{headline}} - {{body}}</li>
-            {{/each}}
-          </ul>
-        </div>
+        <ul class="news list-group">
+          {{#each news}}
+          <li class="list-group-item">
+            <h4 class="list-group-item-heading">{{headline}}</h4>
+            <p class="list-group-item-text">
+              {{body}}
+            </p>
+          </li>
+          {{/each}}
+        </ul>
       </div>
     </div>
   </body>
