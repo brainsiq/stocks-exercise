@@ -51,8 +51,10 @@ describe('Companies', () => {
         expect(company).to.deep.equal({
           id: testCompanyId,
           name: 'two',
-          tickerCode: 'B'
+          tickerCode: 'B',
+          stockPrice: 1234
         })
+
         done()
       })
     })
