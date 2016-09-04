@@ -42,7 +42,7 @@ const registerRoutes = (server, companies) => {
     handler: (req, reply) => {
       companies.list((err, companies) => {
         if (err) {
-          throw err
+          return reply.view('error')
         }
 
         reply.view('index', {companies})
@@ -56,7 +56,7 @@ const registerRoutes = (server, companies) => {
     handler: (req, reply) => {
       companies.details(req.params.id, (err, company) => {
         if (err) {
-          throw err
+          return reply.view('error')
         }
 
         reply.view('company', company)
