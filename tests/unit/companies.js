@@ -40,14 +40,14 @@ const stubMongoDatabase = withError => ({
   }
 })
 
-const CompaniesDatabase = require('../../lib/companies-db')
+const Companies = require('../../lib/companies')
 
-describe('Companies database', () => {
-  describe('getAll', () => {
+describe('Companies', () => {
+  describe('list', () => {
     it('retrieves all companies from the database', done => {
-      const companiesDatabase = new CompaniesDatabase(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase())
 
-      companiesDatabase.getAll((err, companies) => {
+      companies.list((err, companies) => {
         expect(err).to.be.null
         expect(companies).to.deep.equal([
           {id: testCompaniesData[0]._id.valueOf(), name: 'one'},
@@ -60,10 +60,10 @@ describe('Companies database', () => {
   })
 
   it('handles mongoDb errors', done => {
-    const companiesDatabase = new CompaniesDatabase(
+    const companies = new Companies(
       stubMongoDatabase(new Error('a test error')))
 
-    companiesDatabase.getAll((err, companies) => {
+    companies.list((err, companies) => {
       expect(err).to.be.an.instanceof(Error)
       expect(err.message).to.equal('Database error')
       expect(companies).to.be.undefined
@@ -71,12 +71,12 @@ describe('Companies database', () => {
     })
   })
 
-  describe('getOne', () => {
+  describe('details', () => {
     it('retrieves a single company', done => {
-      const companiesDatabase = new CompaniesDatabase(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase())
       const testCompanyId = testCompaniesData[1]._id.valueOf()
 
-      companiesDatabase.getOne(testCompanyId, (err, company) => {
+      companies.details(testCompanyId, (err, company) => {
         expect(err).to.be.null
         expect(company).to.deep.equal({id: testCompanyId, name: 'two'})
         done()
@@ -84,9 +84,9 @@ describe('Companies database', () => {
     })
 
     it('returns nothing for a company that does not exist', done => {
-      const companiesDatabase = new CompaniesDatabase(stubMongoDatabase())
+      const companies = new Companies(stubMongoDatabase())
 
-      companiesDatabase.getOne(new ObjectId().valueOf(), (err, company) => {
+      companies.details(new ObjectId().valueOf(), (err, company) => {
         expect(err).to.be.null
         expect(company).to.be.null
         done()
@@ -94,10 +94,10 @@ describe('Companies database', () => {
     })
 
     it('handles mongoDb errors', done => {
-      const companiesDatabase = new CompaniesDatabase(
+      const companies = new Companies(
         stubMongoDatabase(new Error('a test error')))
 
-      companiesDatabase.getOne(new ObjectId().valueOf(), (err, companies) => {
+      companies.details(new ObjectId().valueOf(), (err, companies) => {
         expect(err).to.be.an.instanceof(Error)
         expect(err.message).to.equal('Database error')
         expect(companies).to.be.undefined

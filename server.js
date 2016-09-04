@@ -4,7 +4,7 @@ const mongoDbUrl = 'mongodb://mm_recruitment_user_readonly:rebelMutualWhistle@ds
 const Hapi = require('hapi')
 const vision = require('vision')
 const MongoClient = require('mongodb').MongoClient
-const CompaniesDatabase = require('./lib/companies-db')
+const Companies = require('./lib/companies')
 
 const registerViews = server =>
   server.views({
@@ -15,12 +15,12 @@ const registerViews = server =>
     path: 'templates'
   })
 
-const registerRoutes = (server, companiesDatabase) => {
+const registerRoutes = (server, companies) => {
   server.route({
     method: 'GET',
     path: '/',
     handler: (req, reply) => {
-      companiesDatabase.getAll((err, companies) => {
+      companies.list((err, companies) => {
         if (err) {
           throw err
         }
@@ -34,7 +34,7 @@ const registerRoutes = (server, companiesDatabase) => {
     method: 'GET',
     path: '/company/{id}',
     handler: (req, reply) => {
-      companiesDatabase.getOne(req.params.id, (err, company) => {
+      companies.details(req.params.id, (err, company) => {
         if (err) {
           throw err
         }
@@ -59,10 +59,10 @@ module.exports = callback => {
         return callback(new Error('Database connection error'))
       }
 
-      const companiesDatabase = new CompaniesDatabase(database)
+      const companies = new Companies(database)
 
       registerViews(server)
-      registerRoutes(server, companiesDatabase)
+      registerRoutes(server, companies)
 
       callback(null, server)
     })
