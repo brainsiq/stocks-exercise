@@ -4,11 +4,6 @@ const webdriver = require('selenium-webdriver')
 const expect = require('chai').expect
 
 const siteUrl = 'http://app:8080'
-const getRandomIntInRange = (min, max) =>
-  Math.floor(Math.random() * (max - min + 1)) + min
-
-const selectRandomLink = links =>
-  links[getRandomIntInRange(0, links.length - 1)]
 
 describe('Homepage', () => {
   let driver
@@ -40,16 +35,17 @@ describe('Homepage', () => {
 
   it('navigates to a company details page', done => {
     driver.get(siteUrl)
-      .then(() => driver.findElements(webdriver.By.css('.container a')))
-      .then(links => selectRandomLink(links))
-      .then(link => Promise.all([link.getText(), link.click()]))
-      .then(previous => {
-        const companyName = previous[0]
-
-        return driver.findElement(webdriver.By.css('.panel-heading'))
-          .then(companyDetailsHeading => companyDetailsHeading.getText())
-          .then(text => expect(text).to.equal(companyName))
-      })
+      .then(() => driver.findElement(webdriver.By.partialLinkText('Microsoft')))
+      .then(link => link.click())
+      .then(() => driver.findElement(webdriver.By.id('company-name')))
+      .then(element => element.getText())
+      .then(companyName => expect(companyName).to.equal('Microsoft Inc'))
+      .then(() => driver.findElement(webdriver.By.id('company-code')))
+      .then(element => element.getText())
+      .then(companyCode => expect(companyCode).to.equal('MSFT'))
+      .then(() => driver.findElement(webdriver.By.id('stock-price')))
+      .then(element => element.getText())
+      .then(stockPrice => expect(stockPrice).to.match(/\d+p/))
       .then(() => done(), done)
   })
 })
