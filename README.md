@@ -1,5 +1,7 @@
 # stocks-exercise
 
+An exercise carried out for a job interview
+
 ## Running the site
 
 Install the dependencies and run the start script:
